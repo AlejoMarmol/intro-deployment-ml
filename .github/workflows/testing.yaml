@@ -4,7 +4,7 @@ jobs:
   testing-api:
     runs-on: windows-latest
     env:
-      SERVICE_ACCOUNT_KEY: s{{ secretes.SERVIVE_ACCOUNT_KEY }}
+      SERVICE_ACCOUNT_KEY: s{{ secrets.SERVIVE_ACCOUNT_KEY }}
     steps:
       - name: Checkout the repo
         users: actions/checkout@v2
