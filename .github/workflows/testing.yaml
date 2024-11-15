@@ -2,44 +2,23 @@ name: Testing API
 on: [push, pull_request]
 jobs:
   testing-api:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     env:
       SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v2
-      
       - name: Creating and activating virtualenv
         run: |
-          pip install virtualenv
+          pip3 install virtualenv
           virtualenv venv
-          venv\Scripts\activate
-      
+          source venv/bin/activate
       - name: Installing dependencies
         run: |
-          venv\Scripts\activate
           pip install dvc[gs]
           pip install -r requirements_test.txt
-          pip install httpx
-      
-      - name: Configure Google credentials
+      - name: Test API
         run: |
-          venv\Scripts\activate
-          python utilities/setter.py > path.txt
-          set GOOGLE_APPLICATION_CREDENTIALS=$(<path.txt)
-      
-      - name: Debug credentials
-        run: |
-          venv\Scripts\activate
-          echo %GOOGLE_APPLICATION_CREDENTIALS%
-          type service-account.json
-      
-      - name: Pull model with DVC
-        run: |
-          venv\Scripts\activate
+          export GOOGLE_APPLICATION_CREDENTIALS=$(python utilities/setter.py)
           dvc pull model/model.pkl -r model-tracker
-      
-      - name: Run tests
-        run: |
-          venv\Scripts\activate
           pytest tests.py
