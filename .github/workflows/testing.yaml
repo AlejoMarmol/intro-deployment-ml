@@ -26,7 +26,13 @@ jobs:
         run: |
           venv\Scripts\activate
           python utilities/setter.py > path.txt
-          set /p GOOGLE_APPLICATION_CREDENTIALS=<path.txt
+          set GOOGLE_APPLICATION_CREDENTIALS=$(<path.txt)
+      
+      - name: Debug credentials
+        run: |
+          venv\Scripts\activate
+          echo %GOOGLE_APPLICATION_CREDENTIALS%
+          type service-account.json
       
       - name: Pull model with DVC
         run: |
