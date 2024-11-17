@@ -54,4 +54,4 @@ jobs:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cat report.txt >> report.md
-          cml comment create --file report.md --publish prediction_behavior.png
+          cat report.md | cml comment create --publish prediction_behavior.png
