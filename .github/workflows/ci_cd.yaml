@@ -25,11 +25,23 @@ jobs:
         with:
           service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
           project_id: ${{ secrets.PROJECT_ID }}
-      - name: Build and Push
+      - name: Debug Environment Variables
+        run: printenv | sort
+      - name: Build Docker Image
         run: |
-          docker build . -t $REGISTRY_NAME:$GITHUB_SHA
+          echo "Building Docker Image..."
+          docker build --progress=plain . -t $REGISTRY_NAME:$GITHUB_SHA
+
+      - name: Debug Authentication
+        run: |
+          echo "Authenticating with Google Cloud..."
           gcloud auth configure-docker -q
-          sudo -u $USER docker push $REGISTRY_NAME:$GITHUB_SHA
+          gcloud projects describe ${{ secrets.PROJECT_ID }}
+
+      - name: Push Docker Image
+        run: |
+          echo "Pushing Docker Image to Registry..."
+          docker push $REGISTRY_NAME:$GITHUB_SHA
       - name: Deploy to Cloud Run
         run: |
           gcloud run services update $SERVICE_NAME --region=$REGION --image=$REGISTRY_NAME:$GITHUB_SHA
