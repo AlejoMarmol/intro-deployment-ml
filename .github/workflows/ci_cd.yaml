@@ -18,6 +18,9 @@ jobs:
           virtualenv venv
           source venv/bin/activate
           pip install dvc[gs]
+      - name: Debug SERVICE_ACCOUNT_KEY
+        run: |
+          python utilities/setter.py
           export GOOGLE_APPLICATION_CREDENTIALS=$(python utilities/setter.py)
           dvc pull model/model.pkl.dvc -r model-tracker
       - name: Authenticate with Google Cloud
