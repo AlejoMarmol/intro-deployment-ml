@@ -6,3 +6,4 @@ venv/
 report.txt
 *.png
 __pycache__/
+encoded-key.txt
