@@ -29,6 +29,8 @@ jobs:
         run: |
           gcloud auth list
           gcloud config list
+          gcloud projects describe $PROJECT_ID
+          echo $SERVICE_ACCOUNT_KEY
       - name: Authenticate Docker with Artifact Registry
         run: |
           gcloud auth configure-docker $REGISTRY_NAME
