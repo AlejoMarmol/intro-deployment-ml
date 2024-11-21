@@ -23,6 +23,10 @@ jobs:
           source venv/bin/activate  # Reactivate virtual environment
           python utilities/setter.py
           export GOOGLE_APPLICATION_CREDENTIALS=$(python utilities/setter.py)
+          echo "Using GOOGLE_APPLICATION_CREDENTIALS at $GOOGLE_APPLICATION_CREDENTIALS"
+          cat $GOOGLE_APPLICATION_CREDENTIALS  # Debug key file content
+          gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+          gcloud config set project $PROJECT_ID
           dvc pull model/model.pkl.dvc -r model-tracker
       - name: Authenticate with Google Cloud
         run: |
