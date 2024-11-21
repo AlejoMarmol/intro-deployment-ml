@@ -1,36 +1,25 @@
 import os
-from base64 import b64decode, binascii
+from base64 import b64decode
 
 def main():
-    # Check if the environment variable is set
-    key = os.environ.get('SERVICE_ACCOUNT_KEY')
+    key = os.environ.get("SERVICE_ACCOUNT_KEY")
     if not key:
-        raise EnvironmentError("SERVICE_ACCOUNT_KEY environment variable is not set.")
-    
-    # Debug: Print the first few characters of the key (safe to debug)
-    print("SERVICE_ACCOUNT_KEY starts with:", key[:10])
-    
+        print("SERVICE_ACCOUNT_KEY environment variable is not set.")
+        exit(1)
+
     try:
-        # Decode the key
+        print(f"SERVICE_ACCOUNT_KEY starts with: {key[:10]}")
         decoded_key = b64decode(key).decode()
         print("Decoded key seems valid.")
-    except binascii.Error as e:
-        # Catch base64 decoding errors and print a clear message
-        print("Error decoding SERVICE_ACCOUNT_KEY:", e)
-        raise ValueError("SERVICE_ACCOUNT_KEY is not a valid base64-encoded string.")
-
-    # Save the decoded key to a file
-    try:
-        with open('path.json', 'w') as json_file:
-            json_file.write(decoded_key)
-        print("Successfully wrote the decoded key to path.json.")
     except Exception as e:
-        # Catch any file writing errors
-        print("Error writing to path.json:", e)
-        raise
+        print(f"Error decoding SERVICE_ACCOUNT_KEY: {e}")
+        exit(1)
 
-    # Debug: Print the absolute path of the written file
-    print("Credential file created at:", os.path.realpath('path.json'))
+    file_path = "path.json"
+    with open(file_path, "w") as json_file:
+        json_file.write(decoded_key)
+        print("Successfully wrote the decoded key to path.json.")
+    print(os.path.abspath(file_path))  # Only this line will be used by the export command
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
