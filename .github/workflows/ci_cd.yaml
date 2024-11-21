@@ -10,51 +10,26 @@ jobs:
       SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
       SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
     steps:
-      - name: Checkout Report
-        uses: actions/checkout@v2
-      - name: Set up virtual environment and install dependencies
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Set environment and bring the model
         run: |
           pip3 install virtualenv
           virtualenv venv
           source venv/bin/activate
           pip install dvc[gs]
-      - name: Debug SERVICE_ACCOUNT_KEY and Pull Model
-        run: |
-          source venv/bin/activate  # Reactivate virtual environment
           export GOOGLE_APPLICATION_CREDENTIALS=$(python utilities/setter.py)
-          echo "Using GOOGLE_APPLICATION_CREDENTIALS at $GOOGLE_APPLICATION_CREDENTIALS"
-          cat $GOOGLE_APPLICATION_CREDENTIALS  # Verify the key file content
-          gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-          gcloud config set project $PROJECT_ID
           dvc pull model/model.pkl.dvc -r model-tracker
-      - name: Authenticate with Google Cloud
-        run: |
-          echo "${{ secrets.SERVICE_ACCOUNT_KEY }}" > $HOME/gcloud-key.json
-          gcloud auth activate-service-account --key-file=$HOME/gcloud-key.json
-          gcloud config set project $PROJECT_ID
-      - name: Configure Docker with GCloud
-        run: |
-            gcloud auth configure-docker
       - name: Set up GCLOUD SDK
         uses: google-github-actions/setup-gcloud@v2
-        with:
+        with: 
           service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
           project_id: ${{ secrets.PROJECT_ID }}
-      - name: Debug Environment Variables
-        run: printenv | sort
-      - name: Build Docker Image
+      - name: Build and Push
         run: |
-          echo "Building Docker Image..."
-          docker build --progress=plain . -t $REGISTRY_NAME:$GITHUB_SHA
-      - name: Debug Authentication
-        run: |
-          echo "Authenticating with Google Cloud..."
+          docker build . -t $REGISTRY_NAME:$GITHUB_SHA
           gcloud auth configure-docker -q
-          gcloud projects describe ${{ secrets.PROJECT_ID }}
-      - name: Push Docker Image
-        run: |
-          echo "Pushing Docker Image to Registry..."
-          docker push $REGISTRY_NAME:$GITHUB_SHA
-      - name: Deploy to Cloud Run
+          sudo -u $USER docker push $REGISTRY_NAME:$GITHUB_SHA
+      - name:
         run: |
           gcloud run services update $SERVICE_NAME --region=$REGION --image=$REGISTRY_NAME:$GITHUB_SHA
