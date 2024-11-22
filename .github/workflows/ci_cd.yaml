@@ -20,6 +20,12 @@ jobs:
           pip install dvc[gs]
           export GOOGLE_APPLICATION_CREDENTIALS=$(python utilities/setter.py)
           dvc pull model/model.pkl.dvc -r model-tracker
+      - name: Print environment variables
+        run: |
+          echo "REGISTRY_NAME: $REGISTRY_NAME"
+          echo "REGION: $REGION"
+          echo "PROJECT_ID: $PROJECT_ID"
+          echo "SERVICE_NAME: $SERVICE_NAME"
       - name: Set up GCLOUD SDK
         uses: google-github-actions/setup-gcloud@v2
         with: 
