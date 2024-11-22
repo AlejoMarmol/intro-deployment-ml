@@ -27,8 +27,14 @@ jobs:
         with: 
           service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
           project_id: ${{ secrets.PROJECT_ID }}
+
       - name: Debug Secret Population
         run: echo "${{ secrets.SERVICE_ACCOUNT_KEY }}" | wc -c
+
+      - name: Verify Decoded Key
+        run: |
+          echo $SERVICE_ACCOUNT_KEY | base64 -d | jq
+          
       - name: Authenticate with Service Account
         run: |
           echo $SERVICE_ACCOUNT_KEY | base64 -d > key.json
