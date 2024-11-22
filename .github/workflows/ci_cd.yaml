@@ -12,6 +12,7 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
+
       - name: Set environment and bring the model
         run: |
           pip3 install virtualenv
@@ -20,30 +21,33 @@ jobs:
           pip install dvc[gs]
           export GOOGLE_APPLICATION_CREDENTIALS=$(python utilities/setter.py)
           dvc pull model/model.pkl.dvc -r model-tracker
-      - name: Print environment variables
-        run: |
-          echo "REGISTRY_NAME: $REGISTRY_NAME"
-          echo "REGION: $REGION"
-          echo "PROJECT_ID: $PROJECT_ID"
-          echo "SERVICE_NAME: $SERVICE_NAME"
+
       - name: Set up GCLOUD SDK
         uses: google-github-actions/setup-gcloud@v2
         with: 
           service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
           project_id: ${{ secrets.PROJECT_ID }}
+
+      - name: Authenticate with Service Account
+        run: |
+          echo ${{ secrets.SERVICE_ACCOUNT_KEY }} > key.json
+          gcloud auth activate-service-account --key-file=key.json
+          gcloud config set project ${{ secrets.PROJECT_ID }}
+
       - name: Verify GCloud Authentication
         run: |
-          echo $SERVICE_ACCOUNT_KEY
-          gcloud projects describe $PROJECT_ID
           gcloud auth list
           gcloud config list
+
       - name: Authenticate Docker with Artifact Registry
         run: |
-          gcloud auth configure-docker $REGISTRY_NAME
+          gcloud auth configure-docker $REGISTRY_NAME --project=$PROJECT_ID
+
       - name: Build and Push
         run: |
           docker build . -t $REGISTRY_NAME:$GITHUB_SHA
           docker push $REGISTRY_NAME:$GITHUB_SHA
+
       - name: Deploy to Cloud Run
         run: |
           gcloud run services update $SERVICE_NAME --region=$REGION --image=$REGISTRY_NAME:$GITHUB_SHA
