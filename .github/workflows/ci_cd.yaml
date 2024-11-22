@@ -34,7 +34,7 @@ jobs:
       - name: Verify Decoded Key
         run: |
           echo $SERVICE_ACCOUNT_KEY | base64 -d | jq
-          
+
       - name: Authenticate with Service Account
         run: |
           echo $SERVICE_ACCOUNT_KEY | base64 -d > key.json
@@ -52,6 +52,7 @@ jobs:
 
       - name: Build and Push
         run: |
+          gcloud auth configure-docker $REGISTRY_NAME
           docker build . -t $REGISTRY_NAME:$GITHUB_SHA
           docker push $REGISTRY_NAME:$GITHUB_SHA
 
