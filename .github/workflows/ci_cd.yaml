@@ -30,7 +30,7 @@ jobs:
 
       - name: Authenticate with Service Account
         run: |
-          python utilities/setter.py > key.json
+          python utilities/setter.py
           gcloud auth activate-service-account --key-file=key.json
           gcloud config set project ${{ secrets.PROJECT_ID }}
 
